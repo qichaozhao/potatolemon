@@ -6,7 +6,7 @@ A neural network library for learning purposes.
 
 This library is a basic neural network library written from scratch in Python, optimised for code readability and understandability over performance. Although it will be dog slow and probably full of bugs, it should be an invaluable learning exercise.
 
-This was very much inspired by taking Andrew Ng's Deep Learning Specialisation Course: www.deeplearning.ai
+This was very much inspired by taking Andrew Ng's Deep Learning Specialisation Course: [www.deeplearning.ai](www.deeplearning.ai)
 
 ## What's with the name?
 
