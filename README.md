@@ -8,7 +8,7 @@ This library is a basic neural network library written from scratch in Python, o
 
 This was very much inspired by taking Andrew Ng's Deep Learning Specialisation Course: [www.deeplearning.ai](www.deeplearning.ai)
 
-## What's with the name?
+### What's with the name?
 
 potato - a very inefficient piece of electronics (although better known as a very tasty root vegetable).
 lemon - a car that is prone to breaking down all the time.
