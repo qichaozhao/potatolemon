@@ -17,24 +17,24 @@ class Neuron(object):
     def __init__(self, num_inputs, activation=sigmoid):
 
         self.activation = activation
-        self.weights = np.random.rand(num_inputs, 1)
-        self.bias = np.zeros(num_inputs)
+        self.weights = np.random.randn(num_inputs) * 0.01
+        self.bias = 0
 
     def forward(self, input):
         """
         In this function we implement the equation y = f(w^T . x + b)
 
-        :param input: a column vector of shape (m, 1)
-        :return: a column vector of shape (m, 1)
+        :param input: a column vector of length (m)
+        :return: a scalar value
         """
 
-        return self.activation(np.dot(self.weights.T, input))
+        return self.activation(np.dot(self.weights.T, input) + self.bias)
 
     def get_weights(self):
         """
         Return the weights
 
-        :return: a weight vector of shape (num_inputs, 1)
+        :return: a weight vector of length num_inputs
         """
         return self.weights
 
