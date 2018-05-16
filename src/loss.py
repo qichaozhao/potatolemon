@@ -37,8 +37,6 @@ def categorical_crossentropy(pred, actual, epsilon=1e-15):
     pred[pred == 0] = epsilon
     pred[pred == 1] = 1 - epsilon
 
-    print(pred)
-
     m, i = pred.shape
 
     # We loop through each class and calculate our final cost
