@@ -101,3 +101,41 @@ def test_basic_network_forward():
 
     # Test that the predict function performs forward propagation as expected
     np.testing.assert_array_equal(nn.forward(ipt), nn.predict(ipt))
+
+
+def test_binary_crossentropy():
+    """
+    Test the binary cross entropy loss function. We pass a number of prediction, actual pairs and check the results.
+
+    :return:
+    """
+
+    # Set up our inputs
+    pred = np.array([0.0, 0.5, 1.0]).reshape((3, 1))
+    actual = np.array([1.0, 1.0, 1.0]).reshape((3, 1))
+
+    # Manually calculate an expected result
+    pred_adj = np.array([1e-15, 0.5, (1 - 1e-15)]).reshape((3, 1))
+    expected_results = -1 / 3 * np.sum(actual * np.log(pred_adj))
+
+    # Assert equals
+    assert loss.binary_crossentropy(pred, actual) == expected_results
+
+
+def test_categorical_crossentropy():
+    """
+    Test the categorical cross entropy loss function. We pass a number of prediction, actual pairs and check the results.
+
+    :return:
+    """
+
+    # Set up our inputs
+    pred = np.array([0.0, 0.5, 1.0]).reshape((3, 1))
+    actual = np.array([1.0, 1.0, 1.0]).reshape((3, 1))
+
+    # Manually calculate an expected result
+    pred_adj = np.array([1e-15, 0.5, (1 - 1e-15)]).reshape((3, 1))
+    expected_results = -1 / 3 * np.sum(actual * np.log(pred_adj))
+
+    # Assert equals
+    assert loss.categorical_crossentropy(pred, actual) == expected_results
