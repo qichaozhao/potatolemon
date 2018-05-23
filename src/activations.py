@@ -7,7 +7,10 @@ def sigmoid(z):
     """
     This function implements the logistic function and returns the result. It can operate on vectors.
 
-    :param z: A scalar or vector (array of dimension (m, 1))
+    :param z: A matrix  of dimension (i, m)
+        - i is the number of nodes
+        - m is the number of training examples
+
     :return: sigmoid(input)
     """
 

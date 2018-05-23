@@ -33,7 +33,7 @@ class Network(object):
         """
         The forward function which runs a forward pass on the entire network
 
-        :param input: A column vector of length input_dim
+        :param input: A matrix of shape (input_dim, training_examples)
         :return: A column vector representing the output of the final layer
         """
 

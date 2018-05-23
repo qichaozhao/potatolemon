@@ -21,9 +21,11 @@ def test_sigmoid_activation():
     :return:
     """
 
-    z = np.array([-np.inf, 0, np.inf])
+    z = np.array([[-np.inf, 0, np.inf],
+                  [np.inf, 0, -np.inf]])
 
-    np.testing.assert_array_equal(activations.sigmoid(z), np.array([0.0, 0.5, 1.0]))
+    np.testing.assert_array_equal(activations.sigmoid(z), np.array([[0.0, 0.5, 1.0],
+                                                                    [1.0, 0.5, 0.0]]))
 
 
 def test_neuron_forward():
@@ -36,16 +38,16 @@ def test_neuron_forward():
     nron = neuron.Neuron(5)
 
     # Test get weights
-    assert nron.get_weights().shape == (5,)
+    assert nron.get_weights().shape == (1, 5)
 
     # Test set weights
-    weights = np.array([0.1, 0.1, 0.1, 0.1, 0.1])
+    weights = np.array([[0.1, 0.1, 0.1, 0.1, 0.1]])
     nron.set_weights(weights)
     np.testing.assert_array_equal(weights, nron.weights)
 
     # Test forward prop step
-    ipt = np.array([1, 1, 1, 1, 1])
-    np.testing.assert_array_equal(activations.sigmoid(np.dot(weights.T, ipt)), nron.forward(ipt))
+    ipt = np.array([[1, 2], [1, 2], [1, 2], [1, 2], [1, 2]])
+    np.testing.assert_array_equal(activations.sigmoid(np.dot(weights, ipt)), nron.forward(ipt))
 
 
 def test_basic_layer_forward():
@@ -61,16 +63,16 @@ def test_basic_layer_forward():
     assert len(lyr.neurons) == 2
 
     # Test that we can get the right weight matrix out of the neurons
-    assert lyr.get_weights().shape == (5, 2)
+    assert lyr.get_weights().shape == (2, 5)
 
     # Test that we can set the right weight matrix
-    weights = np.ones((5, 2))
+    weights = np.ones((2, 5))
     lyr.set_weights(weights)
     np.testing.assert_array_equal(weights, lyr.get_weights())
 
     # Test that the forward propagation step works
-    ipt = np.array([1, 1, 1, 1, 1])
-    np.testing.assert_array_equal(activations.sigmoid(np.dot(weights.T, ipt) + np.zeros(2)), lyr.forward(ipt))
+    ipt = np.array([[1], [1], [1], [1], [1]])
+    np.testing.assert_array_equal(activations.sigmoid(np.dot(weights, ipt) + 0), lyr.forward(ipt))
 
 
 def test_basic_network_forward():
@@ -111,11 +113,11 @@ def test_binary_crossentropy():
     """
 
     # Set up our inputs
-    pred = np.array([0.0, 0.5, 1.0]).reshape((3, 1))
-    actual = np.array([1.0, 1.0, 1.0]).reshape((3, 1))
+    pred = np.array([0.0, 0.5, 1.0]).reshape((1, 3))
+    actual = np.array([1.0, 1.0, 1.0]).reshape((1, 3))
 
     # Manually calculate an expected result
-    pred_adj = np.array([1e-15, 0.5, (1 - 1e-15)]).reshape((3, 1))
+    pred_adj = np.array([1e-15, 0.5, (1 - 1e-15)]).reshape((1, 3))
     expected_results = -1 / 3 * np.sum(actual * np.log(pred_adj))
 
     # Assert equals
@@ -130,11 +132,11 @@ def test_categorical_crossentropy():
     """
 
     # Set up our inputs
-    pred = np.array([0.0, 0.5, 1.0]).reshape((3, 1))
-    actual = np.array([1.0, 1.0, 1.0]).reshape((3, 1))
+    pred = np.array([0.0, 0.5, 1.0]).reshape((1, 3))
+    actual = np.array([1.0, 1.0, 1.0]).reshape((1, 3))
 
     # Manually calculate an expected result
-    pred_adj = np.array([1e-15, 0.5, (1 - 1e-15)]).reshape((3, 1))
+    pred_adj = np.array([1e-15, 0.5, (1 - 1e-15)]).reshape((1, 3))
     expected_results = -1 / 3 * np.sum(actual * np.log(pred_adj))
 
     # Assert equals
