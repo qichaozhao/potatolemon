@@ -15,3 +15,7 @@ potato - a very inefficient piece of electronics (although better known as a ver
 lemon - a car that is prone to breaking down all the time.
 
 It more or less describes the library :)
+
+## Usage
+
+See the examples folder for examples of how to use the network.
