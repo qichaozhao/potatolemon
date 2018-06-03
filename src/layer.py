@@ -5,10 +5,11 @@ import numpy as np
 
 from .neuron import Neuron
 from .activations import sigmoid
+from .optimisers import sgd
+
 
 class Layer(object):
-
-    def __init__(self, size, num_inputs, type=Neuron, activation=sigmoid):
+    def __init__(self, size, num_inputs, type=Neuron, activation=sigmoid, optimiser=sgd, learning_rate=0.01):
         """
         :param size: The number of neurons in the layer
         :param num_inputs: A matrix of shape (i, m).
@@ -21,11 +22,14 @@ class Layer(object):
         self.num_inputs = num_inputs
         self.neuron_type = type
         self.activation = activation
+        self.optimiser = optimiser
+        self.learning_rate = learning_rate
 
         # Create all the neurons in this layer
         self.neurons = []
         for i in range(size):
-            self.neurons.append(Neuron(self.num_inputs, activation=self.activation))
+            self.neurons.append(self.neuron_type(self.num_inputs, activation=self.activation,
+                                                 optimiser=self.optimiser, learning_rate=self.learning_rate))
 
     def get_weights(self):
         """
@@ -35,7 +39,7 @@ class Layer(object):
 
         Therefore, we should concatenate these weights together, so that the layer weights will be (self.size, self.num_inputs)
 
-        :return: A matrix of shape (self.num_inputs, self.size)
+        :return: A matrix of shape (self.size, self.num_inputs)
         """
 
         weights = np.zeros((self.size, self.num_inputs))
@@ -73,5 +77,21 @@ class Layer(object):
 
         return np.vstack(res)
 
+    def backward(self, da):
+        """
+        Performs a backward pass step, calculating the backwards propagation result of all neurons within a layer.
 
+        :param da: The backpropagation result of the previous layer. Shape is (self.size, t)
+        :return: The backpropagation result of the current layer (dp)
+        """
 
+        res = []
+        for idx, neuron in enumerate(self.neurons):
+            da_neuron = da[idx, :]
+            res.append(neuron.backward(da_neuron))
+
+        # Now our result array is a list of backpropagated vectors of shape (m, t), we should just do an element-wise
+        # sum to construct the layer backprop output
+        # noinspection PyArgumentList
+        dp = np.add.reduce(res)
+        return dp

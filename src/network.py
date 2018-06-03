@@ -5,35 +5,49 @@ import numpy as np
 
 from .loss import *
 from .layer import Layer
-from .activations import sigmoid
+from .activations import sigmoid, softmax, tanh
 from .neuron import Neuron
+from .optimisers import sgd
+
 
 class Network(object):
-
-    def __init__(self, input_dim, hidden_layer_dim, optimiser=None, neuron_type=Neuron, activation=sigmoid):
+    def __init__(self, input_dim, hidden_layer_dim, num_classes=2, optimiser=sgd, neuron_type=Neuron,
+                 activation=sigmoid, loss=binary_crossentropy, learning_rate=0.01):
 
         self.input_dim = input_dim
         self.hidden_layer_dim = hidden_layer_dim
         self.optimiser = optimiser
+        self.num_classes = num_classes
         self.neuron_type = neuron_type
         self.activation = activation
+        self.loss = loss
+        self.learning_rate = learning_rate
 
         self.layers = []
         for idx, dim in enumerate(hidden_layer_dim):
 
             # For the first hidden layer, the input dimension should be the overall input dimension
             if idx == 0:
-                self.layers.append(Layer(dim, self.input_dim, type=self.neuron_type, activation=self.activation))
+                self.layers.append(Layer(dim, self.input_dim, type=self.neuron_type, activation=self.activation,
+                                         learning_rate=self.learning_rate, optimiser=self.optimiser))
 
             # For all other hidden layers, the layer size will use the previous layer size as input size, and the layer size specified in the config
             else:
-                self.layers.append(Layer(dim, hidden_layer_dim[idx - 1], type=self.neuron_type, activation=self.activation))
+                self.layers.append(
+                    Layer(dim, hidden_layer_dim[idx - 1], type=self.neuron_type, activation=self.activation,
+                          learning_rate=self.learning_rate, optimiser=self.optimiser))
+
+        if num_classes <= 2:
+            # We add an extra logistic layer.
+            self.layers.append(
+                Layer(1, hidden_layer_dim[-1], type=self.neuron_type, activation=sigmoid,
+                      learning_rate=self.learning_rate, optimiser=self.optimiser))
 
     def forward(self, input):
         """
         The forward function which runs a forward pass on the entire network
 
-        :param input: A matrix of shape (input_dim, training_examples)
+        :param input: A matrix of shape (input_dim, training_examples) that are the features
         :return: A column vector representing the output of the final layer
         """
 
@@ -43,30 +57,66 @@ class Network(object):
 
         return res
 
-    def backward(self, loss):
+    def backward(self, pred, target):
         """
         The backward function that runs one backward propagation pass on the entire network
 
-        :param loss:
+        :param target: The ground truth
+        :param pred: The predicted value
         :return:
         """
-        raise NotImplementedError
+
+        # First we compute the backward pass on the loss
+        dp = self.loss(pred, target, direction='backward')
+
+        # Now we can propagate this through all of our layers
+        for layer in reversed(self.layers):
+            dp = layer.backward(dp)
 
     def predict(self, input):
         """
-        Relies on the forward function to make inference
+        Relies on the forward function to make inference. If we have more than two classes, softmax the prediction
 
-        :param input: A column vector of length input_dim
-        :return: A column vector representing the output of the final layer
+        :param input: A matrix of shape (num_features, num_examples)
+        :return: A matrix representing the output of the final layer (num_classes, num_examples)
         """
-        return self.forward(input)
 
-    def fit(self, input, target):
+        fwd = self.forward(input)
+
+        if self.num_classes > 2:
+            return softmax(fwd)
+        else:
+            return fwd
+
+    def fit(self, input, target, epochs=100, batch_size=None, verbose=False):
         """
         Trains the neural network given a set of data
 
-        :param input: A column vector of length input_dim
-        :param target: A target vector of length input_dim
+        :param input: A matrix vector of shape (num_features, num_examples)
+        :param target: A matrix vector of shape (1, num_examples) for binary classification,
+            and (num_classes, num examples) for multiclass classification.
+        :param num_epochs: How many times to iterate over the training data set
+        :param batch_size: Whether to use minibatches, if set to None will use the whole training set
         :return:
         """
-        raise NotImplementedError
+
+        losses = []
+
+        if batch_size is not None:
+            raise NotImplementedError('We cannot do mini-batch training right now!')
+
+        for i in range(0, epochs):
+            # Forward propagation and calculate losses
+            pred = self.forward(input)
+            loss = self.loss(pred, target)
+
+            # Save losses for printing later
+            losses.append(loss)
+
+            # Backward propagate to update weights
+            self.backward(pred, target)
+
+            if verbose:
+                print('Loss after epoch {}: {}'.format(i, loss))
+
+        return losses

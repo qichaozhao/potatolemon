@@ -9,34 +9,74 @@ Also contains the forward function, used to "activate" the neuron.
 import numpy as np
 
 from .activations import sigmoid
+from .optimisers import sgd
 
 
 class Neuron(object):
-
-
-    def __init__(self, num_inputs, activation=sigmoid):
-
-        self.activation = activation
+    def __init__(self, num_inputs, activation=sigmoid, optimiser=sgd, learning_rate=0.01):
         self.num_inputs = num_inputs
-        self.weights = np.random.randn(1, num_inputs) * 0.01
+        self.activation = activation
+        self.optimiser = optimiser
+        self.learning_rate = learning_rate
+
+        self.weights = np.random.randn(1, num_inputs)
         self.bias = 0
+        self.input = None
+        self.z = None
 
     def forward(self, input):
         """
-        In this function we implement the equation y = f(W.X + b)
+        In this function we implement the equation A = f(W.X + b)
 
-        :param input: a column vector of length (i, m)
-            i: num weights, or rather the number of input nodes
-            m: num training examples
-        :return: a vector of shape (1, m) where m is the number of training examples
+        :param input: a column vector of length (i, t)
+            i: the input size (i.e. number of weights, or num_inputs)
+            t: num training examples
+        :return: a vector of shape (1, t) where m is the number of training examples
         """
-        return self.activation(np.dot(self.weights, input) + self.bias)
+
+        # We save the neuron input and activation function input to the neuron (X) for backpropagation
+        self.input = input
+        self.z = np.dot(self.weights, self.input)
+        return self.activation(self.z + self.bias)
+
+    def backward(self, da):
+        """
+        In this function we implement the backwards propagation step for the neuron.
+
+        We will calculate the following equations:
+
+        1. dz = dJ/dz - using our sigmoid backwards function
+        2. dw = dJ/dz = 1 / m * (dz . A_prev.T)
+        3. db = dJ/db
+        4. dp = dJ/da for the neuron connections in the layer l-1
+
+        Afterwards, we will do the weight update (via our optimisation method).
+
+        :param da: This is the value dJ/dA passed in from layer l+1 (shape: (1, t))
+        :return: dp, to be used in the downstream backpropagation step (shape: (m, t)) where m is the number of inputs
+        """
+
+        # Number of training examples
+        t = self.input.shape[1]
+
+        # Calculate our update equations
+        dz = self.activation(self.z, direction='backward', dp=da)
+        dw = 1 / t * np.dot(dz, self.input.T)
+        db = 1 / t * np.sum(dz)
+        dp = np.dot(self.weights.T, dz)
+
+        # Do the updates
+        self.weights = self.optimiser(self.weights, dw, self.learning_rate)
+        self.bias = self.optimiser(self.bias, db, self.learning_rate)
+
+        # Pass the backpropagation further downstream
+        return dp
 
     def get_weights(self):
         """
         Return the weights
 
-        :return: a weight vector of length num_inputs
+        :return: a weight matrix of size (1, num_inputs)
         """
         return self.weights
 
