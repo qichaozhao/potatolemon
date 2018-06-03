@@ -73,20 +73,35 @@ class Network(object):
         for layer in reversed(self.layers):
             dp = layer.backward(dp)
 
-    def predict(self, input):
+    def predict(self, input, proba=False, proba_thresh=0.5):
         """
         Relies on the forward function to make inference. If we have more than two classes, softmax the prediction
 
         :param input: A matrix of shape (num_features, num_examples)
-        :return: A matrix representing the output of the final layer (num_classes, num_examples)
+        :param proba: If True then return probabilities, else just return labels (0 to 1)
+        :param proba_thresh: Threshold for probability, by default 0.5.
+        :return: A matrix representing the output of the final layer (c, num_examples), where c is the class label
         """
 
         fwd = self.forward(input)
 
         if self.num_classes > 2:
-            return softmax(fwd)
+
+            s = softmax(fwd)
+            if not proba:
+                return np.argmax(s, axis=0)
+
+            else:
+                return s
         else:
-            return fwd
+            if not proba:
+                fwd[fwd >= proba_thresh] = 1
+                fwd[fwd < proba_thresh] = 0
+
+                return fwd
+
+            else:
+                return fwd
 
     def fit(self, input, target, epochs=100, batch_size=None, verbose=False):
         """

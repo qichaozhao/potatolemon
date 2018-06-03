@@ -23,18 +23,18 @@ def binary_crossentropy(pred, actual, epsilon=1e-15, direction='forward'):
     """
 
     # Here we offset zero and one values to avoid infinity when we take logs.
-    pred[pred == 0] = epsilon
-    pred[pred == 1] = 1 - epsilon
+    # pred[pred == 0] = epsilon
+    # pred[pred == 1] = 1 - epsilon
 
     # m is the number of training examples in this case
     t = pred.shape[1]
 
     if direction == 'forward':
-        J = -1 / t * np.sum(np.dot(actual, np.log(pred.T) + np.dot((1 - actual), np.log((1 - pred).T))))
-        return J
+        J = -1 / t * (np.dot(actual, np.log(pred.T)) + np.dot((1 - actual), np.log((1 - pred).T)))
+        return np.squeeze(J)
 
     elif direction == 'backward':
-        dy = -1 * np.divide(actual - pred, np.multiply(pred, 1 - pred))
+        dy = -1 * (np.divide(actual, pred) - np.divide(1 - actual, 1 - pred))
         return dy
 
     else:

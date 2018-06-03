@@ -19,7 +19,7 @@ def tanh(z, direction='forward', dp=None):
         return a
 
     elif direction == 'backward':
-        return (1 - np.square(a)) * dp
+        return (1 - np.power(a, 2)) * dp
 
     else:
         raise Exception('Parameter "direction" must take values of { "forward", "backward" }')

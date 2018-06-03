@@ -19,10 +19,14 @@ class Neuron(object):
         self.optimiser = optimiser
         self.learning_rate = learning_rate
 
-        self.weights = np.random.randn(1, num_inputs)
-        self.bias = 0
+        self.weights = np.random.uniform(0, 1, (1, num_inputs))
+        self.bias = np.zeros((1, 1))
         self.input = None
         self.z = None
+
+        # For weight updation
+        self.dw = None
+        self.db = None
 
     def forward(self, input):
         """
@@ -36,8 +40,8 @@ class Neuron(object):
 
         # We save the neuron input and activation function input to the neuron (X) for backpropagation
         self.input = input
-        self.z = np.dot(self.weights, self.input)
-        return self.activation(self.z + self.bias)
+        self.z = np.dot(self.weights, self.input) + self.bias
+        return self.activation(self.z)
 
     def backward(self, da):
         """
@@ -61,13 +65,13 @@ class Neuron(object):
 
         # Calculate our update equations
         dz = self.activation(self.z, direction='backward', dp=da)
-        dw = 1 / t * np.dot(dz, self.input.T)
-        db = 1 / t * np.sum(dz)
+        self.dw = 1 / t * np.dot(dz, self.input.T)
+        self.db = 1 / t * np.sum(dz)
         dp = np.dot(self.weights.T, dz)
 
         # Do the updates
-        self.weights = self.optimiser(self.weights, dw, self.learning_rate)
-        self.bias = self.optimiser(self.bias, db, self.learning_rate)
+        self.weights = self.optimiser(self.weights, self.dw, self.learning_rate)
+        self.bias = self.optimiser(self.bias, self.db, self.learning_rate)
 
         # Pass the backpropagation further downstream
         return dp
