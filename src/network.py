@@ -5,7 +5,7 @@ import numpy as np
 
 from .loss import *
 from .layer import Layer
-from .activations import sigmoid, softmax, tanh
+from .activations import sigmoid, softmax, tanh, relu
 from .neuron import Neuron
 from .optimisers import sgd
 
@@ -37,10 +37,15 @@ class Network(object):
                     Layer(dim, hidden_layer_dim[idx - 1], type=self.neuron_type, activation=self.activation,
                           learning_rate=self.learning_rate, optimiser=self.optimiser))
 
-        if num_classes <= 2:
-            # We add an extra logistic layer.
+        if self.num_classes <= 2:
+            # We add an extra logistic layer with one neuron.
             self.layers.append(
                 Layer(1, hidden_layer_dim[-1], type=self.neuron_type, activation=sigmoid,
+                      learning_rate=self.learning_rate, optimiser=self.optimiser))
+        else:
+            # We add an extra logistic layer with neurons for the number of classes
+            self.layers.append(
+                Layer(self.num_classes, hidden_layer_dim[-1], type=self.neuron_type, activation=sigmoid,
                       learning_rate=self.learning_rate, optimiser=self.optimiser))
 
     def forward(self, input):

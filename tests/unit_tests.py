@@ -154,7 +154,7 @@ def test_categorical_crossentropy():
 
     # Manually calculate an expected result
     pred_adj = activations.softmax(pred)
-    expected_results = -1 * np.sum(actual * np.log(pred_adj))
+    expected_results = -1 * np.dot(actual * np.log(pred_adj).T)
 
     # Assert equals
     assert loss.categorical_crossentropy(pred, actual) == expected_results

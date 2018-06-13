@@ -23,8 +23,8 @@ def binary_crossentropy(pred, actual, epsilon=1e-15, direction='forward'):
     """
 
     # Here we offset zero and one values to avoid infinity when we take logs.
-    # pred[pred == 0] = epsilon
-    # pred[pred == 1] = 1 - epsilon
+    pred[pred == 0] = epsilon
+    pred[pred == 1] = 1 - epsilon
 
     # m is the number of training examples in this case
     t = pred.shape[1]
@@ -85,12 +85,12 @@ def categorical_crossentropy(pred, actual, epsilon=1e-15, direction='forward', u
         # we use a loop
         J = 0
         for cls in range(i):
-            pred_cls = pred[cls, :].T
-            actual_cls = actual[cls, :]
+            pred_cls = pred[cls, :].reshape((1, t))
+            actual_cls = actual[cls, :].reshape((1, t))
 
-            J = J + (- 1 / t * np.sum(np.dot(actual_cls, np.log(pred_cls))))
+            J = J + (- 1 / t * np.dot(actual_cls, np.log(pred_cls.T)))
 
-        return J
+        return np.squeeze(J)
 
     elif direction == 'backward':
 

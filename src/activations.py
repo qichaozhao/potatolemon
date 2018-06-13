@@ -3,6 +3,27 @@ This file contains all of our activation functions.
 """
 import numpy as np
 
+
+def relu(z, direction='forward', dp=None):
+    """
+    This function implements the relu function and returns the result. It can operate on matrixes.
+
+    :param z:
+    :param direction:
+    :param dp:
+    :return:
+    """
+
+    if direction == 'forward':
+        return np.maximum(0, z)
+
+    elif direction == 'backward':
+        dz = dp.reshape(z.shape) # Ensure dz and z are the same shape
+        dz[z <= 0] = 0
+
+        return dz
+
+
 def tanh(z, direction='forward', dp=None):
     """
     This function implements the tanh function and returns the result. It can operate on matrixes.
@@ -19,7 +40,7 @@ def tanh(z, direction='forward', dp=None):
         return a
 
     elif direction == 'backward':
-        return (1 - np.power(a, 2)) * dp
+        return (1 - np.power(a, 2)) * dp.reshape(z.shape)
 
     else:
         raise Exception('Parameter "direction" must take values of { "forward", "backward" }')
@@ -47,7 +68,7 @@ def sigmoid(z, direction='forward', dp=None):
         return a
 
     elif direction == 'backward':
-        return a * (1 - a) * dp
+        return a * (1 - a) * dp.reshape(z.shape)
 
     else:
         raise Exception('Parameter "direction" must take values of { "forward", "backward" }')
