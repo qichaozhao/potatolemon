@@ -50,7 +50,7 @@ class Neuron(object):
         We will calculate the following equations:
 
         1. dz = dJ/dz - using our sigmoid backwards function
-        2. dw = dJ/dz = 1 / m * (dz . A_prev.T)
+        2. dw = dJ/dw = 1 / m * (dz . A_prev.T)
         3. db = dJ/db
         4. dp = dJ/da for the neuron connections in the layer l-1
 
